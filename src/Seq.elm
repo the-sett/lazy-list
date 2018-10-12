@@ -9,7 +9,6 @@ module Seq exposing
     , andMap, andThen
     , numbers, sum, product
     , map2, map3, map4, map5
-    , zip3, zip4, zip5
     , product2, product3, product4, product5
     )
 
@@ -66,16 +65,13 @@ module Seq exposing
 @docs map2, map3, map4, map5
 
 
-# All the zips.
-
-@docs zip3, zip4, zip5
-
-
 # All the Cartesian products.
 
 @docs product2, product3, product4, product5
 
 -}
+
+import Array exposing (Array)
 
 
 type Seq a
@@ -83,84 +79,168 @@ type Seq a
     | Cons a (() -> Seq a)
 
 
-cons =
-    Debug.todo "Not implemented yet"
+cons : a -> Seq a -> Seq a
+cons a list =
+    Cons a (\() -> list)
 
 
+empty : Seq a
 empty =
-    Debug.todo "Not implemented yet"
+    Nil
 
 
-singleton =
-    Debug.todo "Not implemented yet"
+singleton : a -> Seq a
+singleton a =
+    cons a empty
 
 
-isEmpty =
-    Debug.todo "Not implemented yet"
+isEmpty : Seq a -> Bool
+isEmpty list =
+    case list of
+        Nil ->
+            True
+
+        _ ->
+            False
 
 
-head =
-    Debug.todo "Not implemented yet"
+head : Seq a -> Maybe a
+head list =
+    case list of
+        Nil ->
+            Nothing
+
+        Cons first _ ->
+            Just first
 
 
-tail =
-    Debug.todo "Not implemented yet"
+tail : Seq a -> Maybe (Seq a)
+tail list =
+    case list of
+        Nil ->
+            Nothing
+
+        Cons _ rest ->
+            Just <| rest ()
 
 
-headAndTail =
-    Debug.todo "Not implemented yet"
+headAndTail : Seq a -> Maybe ( a, Seq a )
+headAndTail list =
+    case list of
+        Nil ->
+            Nothing
+
+        Cons first rest ->
+            Just ( first, rest () )
 
 
-member =
-    Debug.todo "Not implemented yet"
+member : a -> Seq a -> Bool
+member a list =
+    case list of
+        Nil ->
+            False
+
+        Cons first rest ->
+            first == a || member a (rest ())
 
 
+length : Seq a -> Int
 length =
-    Debug.todo "Not implemented yet"
+    reduce (\_ n -> n + 1) 0
 
 
-toList =
-    Debug.todo "Not implemented yet"
+toList : Seq a -> List a
+toList list =
+    case list of
+        Nil ->
+            []
+
+        Cons first rest ->
+            first :: toList (rest ())
 
 
+fromList : List a -> Seq a
 fromList =
-    Debug.todo "Not implemented yet"
+    List.foldr cons empty
 
 
-toArray =
-    Debug.todo "Not implemented yet"
+toArray : Seq a -> Array a
+toArray list =
+    case list of
+        Nil ->
+            Array.empty
+
+        Cons first rest ->
+            Array.append (Array.push first Array.empty) (toArray <| rest ())
 
 
+fromArray : Array a -> Seq a
 fromArray =
-    Debug.todo "Not implemented yet"
+    Array.foldr cons empty
 
 
-map =
-    Debug.todo "Not implemented yet"
+map : (a -> b) -> Seq a -> Seq b
+map f list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            Cons (f first) (\() -> map f (rest ()))
 
 
+zip : Seq a -> Seq b -> Seq ( a, b )
 zip =
-    Debug.todo "Not implemented yet"
+    map2 Tuple.pair
 
 
-reduce =
-    Debug.todo "Not implemented yet"
+zip2 : Seq a -> Seq b -> Seq c -> Seq ( a, b, c )
+zip2 =
+    let
+        triple a b c =
+            ( a, b, c )
+    in
+    map3 triple
 
 
-flatten =
-    Debug.todo "Not implemented yet"
+reduce : (a -> b -> b) -> b -> Seq a -> b
+reduce reducer b list =
+    case list of
+        Nil ->
+            b
+
+        Cons first rest ->
+            reduce reducer (reducer first b) (rest ())
 
 
-append =
-    Debug.todo "Not implemented yet"
+flatten : Seq (Seq a) -> Seq a
+flatten list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            append first (flatten (rest ()))
 
 
+append : Seq a -> Seq a -> Seq a
+append list1 list2 =
+    case list1 of
+        Nil ->
+            list2
+
+        Cons first rest ->
+            Cons first (\() -> append (rest ()) list2)
+
+
+foldl : (a -> b -> b) -> b -> Seq a -> b
 foldl =
-    Debug.todo "Not implemented yet"
+    reduce
 
 
-foldr =
-    Debug.todo "Not implemented yet"
+foldr : (a -> b -> b) -> b -> Seq a -> b
+foldr reducer b list =
+    Array.foldr reducer b (toArray list)
 
 
 intersperse =
@@ -252,18 +332,6 @@ map4 =
 
 
 map5 =
-    Debug.todo "Not implemented yet"
-
-
-zip3 =
-    Debug.todo "Not implemented yet"
-
-
-zip4 =
-    Debug.todo "Not implemented yet"
-
-
-zip5 =
     Debug.todo "Not implemented yet"
 
 
