@@ -243,56 +243,149 @@ foldr reducer b list =
     Array.foldr reducer b (toArray list)
 
 
-intersperse =
-    Debug.todo "Not implemented yet"
+intersperse : a -> Seq a -> Seq a
+intersperse a list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            case rest () of
+                Nil ->
+                    cons first empty
+
+                Cons second rest2 ->
+                    case rest2 () of
+                        Nil ->
+                            cons first (cons a (cons second empty))
+
+                        _ ->
+                            cons first (cons a (cons second (cons a (intersperse a (rest2 ())))))
 
 
-interleave =
-    Debug.todo "Not implemented yet"
+interleave : Seq a -> Seq a -> Seq a
+interleave list1 list2 =
+    case list1 of
+        Nil ->
+            list2
+
+        Cons first1 rest1 ->
+            case list2 of
+                Nil ->
+                    list1
+
+                Cons first2 rest2 ->
+                    cons first1 (cons first2 (interleave (rest1 ()) (rest2 ())))
 
 
+reverse : Seq a -> Seq a
 reverse =
-    Debug.todo "Not implemented yet"
+    reduce cons empty
 
 
-cycle =
-    Debug.todo "Not implemented yet"
+cycle : Seq a -> Seq a
+cycle list =
+    append list (cycle list)
 
 
-iterate =
-    Debug.todo "Not implemented yet"
+iterate : (a -> a) -> a -> Seq a
+iterate f a =
+    Cons a (\() -> iterate f (f a))
 
 
-repeat =
-    Debug.todo "Not implemented yet"
+repeat : a -> Seq a
+repeat a =
+    Cons a (\() -> repeat a)
 
 
-take =
-    Debug.todo "Not implemented yet"
+take : Int -> Seq a -> Seq a
+take n list =
+    if n <= 0 then
+        Nil
+
+    else
+        case list of
+            Nil ->
+                Nil
+
+            Cons first rest ->
+                Cons first (\() -> take (n - 1) (rest ()))
 
 
-takeWhile =
-    Debug.todo "Not implemented yet"
+takeWhile : (a -> Bool) -> Seq a -> Seq a
+takeWhile predicate list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            if predicate first then
+                Cons first (\() -> takeWhile predicate (rest ()))
+
+            else
+                Nil
 
 
-drop =
-    Debug.todo "Not implemented yet"
+drop : Int -> Seq a -> Seq a
+drop n list =
+    if n <= 0 then
+        list
+
+    else
+        case list of
+            Nil ->
+                Nil
+
+            Cons first rest ->
+                drop (n - 1) (rest ())
 
 
-dropWhile =
-    Debug.todo "Not implemented yet"
+dropWhile : (a -> Bool) -> Seq a -> Seq a
+dropWhile predicate list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            if predicate first then
+                dropWhile predicate <| rest ()
+
+            else
+                list
 
 
-keepIf =
-    Debug.todo "Not implemented yet"
+keepIf : (a -> Bool) -> Seq a -> Seq a
+keepIf predicate list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            if predicate first then
+                Cons first (\() -> keepIf predicate <| rest ())
+
+            else
+                keepIf predicate <| rest ()
 
 
-dropIf =
-    Debug.todo "Not implemented yet"
+dropIf : (a -> Bool) -> Seq a -> Seq a
+dropIf predicate =
+    keepIf (\n -> not (predicate n))
 
 
-filterMap =
-    Debug.todo "Not implemented yet"
+filterMap : (a -> Maybe b) -> Seq a -> Seq b
+filterMap transform list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            case transform first of
+                Just val ->
+                    Cons val (\() -> filterMap transform <| rest ())
+
+                Nothing ->
+                    filterMap transform <| rest ()
 
 
 unique =
