@@ -8,8 +8,8 @@ module Seq exposing
     , keepIf, dropIf, filterMap, unique
     , andMap, andThen
     , numbers, sum, product
-    , map2, map3, map4, map5
-    , product2, product3, product4, product5
+    , map2, map3
+    , product2, product3
     )
 
 {-| Lazy list implementation in Elm.
@@ -62,12 +62,12 @@ module Seq exposing
 
 # All the maps.
 
-@docs map2, map3, map4, map5
+@docs map2, map3
 
 
 # All the Cartesian products.
 
-@docs product2, product3, product4, product5
+@docs product2, product3
 
 -}
 
@@ -388,57 +388,100 @@ filterMap transform list =
                     filterMap transform <| rest ()
 
 
-unique =
-    Debug.todo "Not implemented yet"
+unique : Seq a -> Seq a
+unique list =
+    case list of
+        Nil ->
+            Nil
+
+        Cons first rest ->
+            if member first <| rest () then
+                unique <| rest ()
+
+            else
+                Cons first (\() -> unique <| rest ())
 
 
-andMap =
-    Debug.todo "Not implemented yet"
+andMap : Seq a -> Seq (a -> b) -> Seq b
+andMap listVal listFuncs =
+    map2 (<|) listFuncs listVal
 
 
-andThen =
-    Debug.todo "Not implemented yet"
+andThen : (a -> Seq b) -> Seq a -> Seq b
+andThen f list =
+    map f list |> flatten
 
 
+numbers : Seq number
 numbers =
-    Debug.todo "Not implemented yet"
+    iterate ((+) 1) 1
 
 
+sum : Seq number -> number
 sum =
-    Debug.todo "Not implemented yet"
+    reduce (+) 0
 
 
+product : Seq number -> number
 product =
-    Debug.todo "Not implemented yet"
+    reduce (*) 1
 
 
-map2 =
-    Debug.todo "Not implemented yet"
+map2 : (a -> b -> c) -> Seq a -> Seq b -> Seq c
+map2 f list1 list2 =
+    case list1 of
+        Nil ->
+            Nil
+
+        Cons first1 rest1 ->
+            case list2 of
+                Nil ->
+                    Nil
+
+                Cons first2 rest2 ->
+                    Cons (f first1 first2) (\() -> map2 f (rest1 ()) (rest2 ()))
 
 
-map3 =
-    Debug.todo "Not implemented yet"
+map3 : (a -> b -> c -> d) -> Seq a -> Seq b -> Seq c -> Seq d
+map3 f list1 list2 list3 =
+    case list1 of
+        Nil ->
+            Nil
+
+        Cons first1 rest1 ->
+            case list2 of
+                Nil ->
+                    Nil
+
+                Cons first2 rest2 ->
+                    case list3 of
+                        Nil ->
+                            Nil
+
+                        Cons first3 rest3 ->
+                            Cons (f first1 first2 first3) (\() -> map3 f (rest1 ()) (rest2 ()) (rest3 ()))
 
 
-map4 =
-    Debug.todo "Not implemented yet"
+product2 : Seq a -> Seq b -> Seq ( a, b )
+product2 list1 list2 =
+    case list1 of
+        Nil ->
+            Nil
+
+        Cons first1 rest1 ->
+            case list2 of
+                Nil ->
+                    Nil
+
+                Cons _ _ ->
+                    append (map (Tuple.pair first1) list2) (product2 (rest1 ()) list2)
 
 
-map5 =
-    Debug.todo "Not implemented yet"
+product3 : Seq a -> Seq b -> Seq c -> Seq ( a, b, c )
+product3 list1 list2 list3 =
+    case list1 of
+        Nil ->
+            Nil
 
-
-product2 =
-    Debug.todo "Not implemented yet"
-
-
-product3 =
-    Debug.todo "Not implemented yet"
-
-
-product4 =
-    Debug.todo "Not implemented yet"
-
-
-product5 =
-    Debug.todo "Not implemented yet"
+        Cons first1 rest1 ->
+            append (map (\( b, c ) -> ( first1, b, c )) (product2 list2 list3)) (product3 (rest1 ()) list2 list3)
