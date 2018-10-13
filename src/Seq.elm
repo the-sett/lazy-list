@@ -74,26 +74,36 @@ module Seq exposing
 import Array exposing (Array)
 
 
+{-| The lazy list type.
+-}
 type Seq a
     = Nil
     | Cons a (() -> Seq a)
 
 
+{-| Add a value to the front of a list.
+-}
 cons : a -> Seq a -> Seq a
 cons a list =
     Cons a (\() -> list)
 
 
+{-| Create an empty list.
+-}
 empty : Seq a
 empty =
     Nil
 
 
+{-| Create a singleton list.
+-}
 singleton : a -> Seq a
 singleton a =
     cons a empty
 
 
+{-| Detect if a list is empty or not.
+-}
 isEmpty : Seq a -> Bool
 isEmpty list =
     case list of
@@ -104,6 +114,8 @@ isEmpty list =
             False
 
 
+{-| Get the head of a list.
+-}
 head : Seq a -> Maybe a
 head list =
     case list of
@@ -114,6 +126,8 @@ head list =
             Just first
 
 
+{-| Get the tail of a list.
+-}
 tail : Seq a -> Maybe (Seq a)
 tail list =
     case list of
@@ -124,6 +138,8 @@ tail list =
             Just <| rest ()
 
 
+{-| Get the head and tail of a list.
+-}
 headAndTail : Seq a -> Maybe ( a, Seq a )
 headAndTail list =
     case list of
@@ -134,6 +150,8 @@ headAndTail list =
             Just ( first, rest () )
 
 
+{-| Test if a value is a member of a list.
+-}
 member : a -> Seq a -> Bool
 member a list =
     case list of
@@ -144,11 +162,15 @@ member a list =
             first == a || member a (rest ())
 
 
+{-| Get the length of a lazy list - provided it is finite.
+-}
 length : Seq a -> Int
 length =
     reduce (\_ n -> n + 1) 0
 
 
+{-| Convert a lazy list to a normal list.
+-}
 toList : Seq a -> List a
 toList list =
     case list of
@@ -159,11 +181,15 @@ toList list =
             first :: toList (rest ())
 
 
+{-| Convert a normal list to a lazy list.
+-}
 fromList : List a -> Seq a
 fromList =
     List.foldr cons empty
 
 
+{-| Convert a lazy list to an array.
+-}
 toArray : Seq a -> Array a
 toArray list =
     case list of
@@ -174,11 +200,15 @@ toArray list =
             Array.append (Array.push first Array.empty) (toArray <| rest ())
 
 
+{-| Convert an array to a lazy list.
+-}
 fromArray : Array a -> Seq a
 fromArray =
     Array.foldr cons empty
 
 
+{-| Map a function over a list.
+-}
 map : (a -> b) -> Seq a -> Seq b
 map f list =
     case list of
@@ -189,11 +219,15 @@ map f list =
             Cons (f first) (\() -> map f (rest ()))
 
 
+{-| Zip two lists together.
+-}
 zip : Seq a -> Seq b -> Seq ( a, b )
 zip =
     map2 Tuple.pair
 
 
+{-| Zip three lists together.
+-}
 zip2 : Seq a -> Seq b -> Seq c -> Seq ( a, b, c )
 zip2 =
     let
@@ -203,6 +237,12 @@ zip2 =
     map3 triple
 
 
+{-| Reduce a list with a given reducer and an initial value.
+
+Example :
+reduce (+) 0 (fromList [1, 2, 3, 4]) == 10
+
+-}
 reduce : (a -> b -> b) -> b -> Seq a -> b
 reduce reducer b list =
     case list of
@@ -213,6 +253,9 @@ reduce reducer b list =
             reduce reducer (reducer first b) (rest ())
 
 
+{-| Flatten a list of lists into a single list by appending all the inner
+lists into one big list.
+-}
 flatten : Seq (Seq a) -> Seq a
 flatten list =
     case list of
@@ -223,6 +266,8 @@ flatten list =
             append first (flatten (rest ()))
 
 
+{-| Append a list to another list.
+-}
 append : Seq a -> Seq a -> Seq a
 append list1 list2 =
     case list1 of
