@@ -278,16 +278,22 @@ append list1 list2 =
             Cons first (\() -> append (rest ()) list2)
 
 
+{-| Analogous to `List.foldl`. Is an alias for `reduce`.
+-}
 foldl : (a -> b -> b) -> b -> Seq a -> b
 foldl =
     reduce
 
 
+{-| Analogous to `List.foldr`.
+-}
 foldr : (a -> b -> b) -> b -> Seq a -> b
 foldr reducer b list =
     Array.foldr reducer b (toArray list)
 
 
+{-| Places the given value between all members of the given list.
+-}
 intersperse : a -> Seq a -> Seq a
 intersperse a list =
     case list of
@@ -308,6 +314,9 @@ intersperse a list =
                             cons first (cons a (cons second (cons a (intersperse a (rest2 ())))))
 
 
+{-| Interleave the elements of a list in another list. The two lists get
+interleaved at the end.
+-}
 interleave : Seq a -> Seq a -> Seq a
 interleave list1 list2 =
     case list1 of
@@ -323,26 +332,47 @@ interleave list1 list2 =
                     cons first1 (cons first2 (interleave (rest1 ()) (rest2 ())))
 
 
+{-| Reverse a list.
+-}
 reverse : Seq a -> Seq a
 reverse =
     reduce cons empty
 
 
+{-| Take a list and repeat it ad infinitum. This cycles a finite list
+by putting the front after the end of the list. This results in a no-op in
+the case of an infinite list.
+-}
 cycle : Seq a -> Seq a
 cycle list =
     append list (cycle list)
 
 
+{-| Create an infinite list of applications of a function on some value.
+
+Equivalent to:
+
+    cons x (cons (f x) (cons (f (f x)) (cons (f (f (f x))) ... -- etc...
+
+-}
 iterate : (a -> a) -> a -> Seq a
 iterate f a =
     Cons a (\() -> iterate f (f a))
 
 
+{-| Repeat a value ad infinitum.
+Be careful when you use this. The result of this is a truly infinite list.
+Do not try calling `reduce` or `toList` on an infinite list as it'll never
+finish computing. Make sure you then filter it down to a finite list with `head`
+or `take` or something.
+-}
 repeat : a -> Seq a
 repeat a =
     Cons a (\() -> repeat a)
 
 
+{-| Take at most `n` many values from a list.
+-}
 take : Int -> Seq a -> Seq a
 take n list =
     if n <= 0 then
@@ -357,6 +387,8 @@ take n list =
                 Cons first (\() -> take (n - 1) (rest ()))
 
 
+{-| Take elements from a list as long as the predicate is satisfied.
+-}
 takeWhile : (a -> Bool) -> Seq a -> Seq a
 takeWhile predicate list =
     case list of
@@ -371,6 +403,8 @@ takeWhile predicate list =
                 Nil
 
 
+{-| Drop at most `n` many values from a list.
+-}
 drop : Int -> Seq a -> Seq a
 drop n list =
     if n <= 0 then
@@ -385,6 +419,8 @@ drop n list =
                 drop (n - 1) (rest ())
 
 
+{-| Drop elements from a list as long as the predicate is satisfied.
+-}
 dropWhile : (a -> Bool) -> Seq a -> Seq a
 dropWhile predicate list =
     case list of
@@ -399,6 +435,8 @@ dropWhile predicate list =
                 list
 
 
+{-| Keep all elements in a list that satisfy the given predicate.
+-}
 keepIf : (a -> Bool) -> Seq a -> Seq a
 keepIf predicate list =
     case list of
@@ -413,11 +451,16 @@ keepIf predicate list =
                 keepIf predicate <| rest ()
 
 
+{-| Drop all elements in a list that satisfy the given predicate.
+-}
 dropIf : (a -> Bool) -> Seq a -> Seq a
 dropIf predicate =
     keepIf (\n -> not (predicate n))
 
 
+{-| Map a function that may fail over a lazy list, keeping only
+the values that were successfully transformed.
+-}
 filterMap : (a -> Maybe b) -> Seq a -> Seq b
 filterMap transform list =
     case list of
@@ -433,6 +476,8 @@ filterMap transform list =
                     filterMap transform <| rest ()
 
 
+{-| Remove all duplicates from a list and return a list of distinct elements.
+-}
 unique : Seq a -> Seq a
 unique list =
     case list of
@@ -447,31 +492,52 @@ unique list =
                 Cons first (\() -> unique <| rest ())
 
 
+{-| Known as `mapN` in some circles. Allows you to apply `map` in cases
+where then number of arguments are greater than 5.
+
+The argument order is such that it works well with `|>` chains.
+
+-}
 andMap : Seq a -> Seq (a -> b) -> Seq b
 andMap listVal listFuncs =
     map2 (<|) listFuncs listVal
 
 
+{-| Chain list producing operations. Map then flatten.
+-}
 andThen : (a -> Seq b) -> Seq a -> Seq b
 andThen f list =
     map f list |> flatten
 
 
+{-| The infinite list of counting numbers.
+
+i.e.:
+
+    cons 1 (cons 2 (cons 3 (cons 4 (cons 5 ... -- etc...
+
+-}
 numbers : Seq number
 numbers =
     iterate ((+) 1) 1
 
 
+{-| Get the sum of a list of numbers.
+-}
 sum : Seq number -> number
 sum =
     reduce (+) 0
 
 
+{-| Get the product of a list of numbers.
+-}
 product : Seq number -> number
 product =
     reduce (*) 1
 
 
+{-| Map a function over 2 lists.
+-}
 map2 : (a -> b -> c) -> Seq a -> Seq b -> Seq c
 map2 f list1 list2 =
     case list1 of
@@ -487,6 +553,8 @@ map2 f list1 list2 =
                     Cons (f first1 first2) (\() -> map2 f (rest1 ()) (rest2 ()))
 
 
+{-| Map a function over 3 lists.
+-}
 map3 : (a -> b -> c -> d) -> Seq a -> Seq b -> Seq c -> Seq d
 map3 f list1 list2 list3 =
     case list1 of
@@ -507,6 +575,8 @@ map3 f list1 list2 list3 =
                             Cons (f first1 first2 first3) (\() -> map3 f (rest1 ()) (rest2 ()) (rest3 ()))
 
 
+{-| Create a lazy list containing all possible pairs in the given lazy lists.
+-}
 product2 : Seq a -> Seq b -> Seq ( a, b )
 product2 list1 list2 =
     case list1 of
@@ -522,6 +592,8 @@ product2 list1 list2 =
                     append (map (Tuple.pair first1) list2) (product2 (rest1 ()) list2)
 
 
+{-| Create a lazy list containing all possible triples in the given lazy lists.
+-}
 product3 : Seq a -> Seq b -> Seq c -> Seq ( a, b, c )
 product3 list1 list2 list3 =
     case list1 of
