@@ -37,7 +37,7 @@ module Seq exposing
 
 # Map, reduce and related operations.
 
-@docs map, zip, reduce, flatten, append, foldl, foldr
+@docs map, zip, reduce, reductions, flatten, append, foldl, foldr
 
 
 # Common operations.
