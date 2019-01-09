@@ -3,7 +3,7 @@ module Seq exposing
     , cons, empty, singleton
     , isEmpty, head, tail, headAndTail, member, length
     , toList, fromList, toArray, fromArray
-    , map, zip, reduce, flatten, append, foldl, foldr
+    , map, zip, reduce, reductions, flatten, append, foldl, foldr
     , intersperse, interleave, reverse, cycle, iterate, repeat, take, takeWhile, drop, dropWhile
     , keepIf, dropIf, filterMap, unique
     , andMap, andThen
@@ -251,6 +251,18 @@ reduce reducer b list =
 
         Cons first rest ->
             reduce reducer (reducer first b) (rest ())
+
+
+{-| Produce intermediate values of reduce.
+-}
+reductions : (a -> b -> b) -> b -> Seq a -> Seq b
+reductions reducer b list =
+    case list of
+        Nil ->
+            singleton b
+
+        Cons first rest ->
+            Cons b (\_ -> reductions reducer (reducer first b) (rest ()))
 
 
 {-| Flatten a list of lists into a single list by appending all the inner
