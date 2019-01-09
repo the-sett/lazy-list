@@ -351,13 +351,16 @@ reverse =
     reduce cons empty
 
 
-{-| Take a list and repeat it ad infinitum. This cycles a finite list
-by putting the front after the end of the list. This results in a no-op in
-the case of an infinite list.
+{-| Take a list and repeat it ad infinitum.
 -}
 cycle : Seq a -> Seq a
 cycle list =
-    append list (cycle list)
+    case list of
+        Cons first rest ->
+            Cons first (\() -> append (rest ()) (cycle list))
+
+        Nil ->
+            Nil
 
 
 {-| Create an infinite list of applications of a function on some value.
