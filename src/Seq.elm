@@ -173,12 +173,17 @@ length =
 -}
 toList : Seq a -> List a
 toList list =
-    case list of
-        Nil ->
-            []
+    let
+        helper : Seq a -> List a -> List a
+        helper coll acc =
+            case coll of
+                Nil ->
+                    List.reverse acc
 
-        Cons first rest ->
-            first :: toList (rest ())
+                Cons first rest ->
+                    helper (rest ()) (first :: acc)
+    in
+    helper list []
 
 
 {-| Convert a normal list to a lazy list.
@@ -192,12 +197,7 @@ fromList =
 -}
 toArray : Seq a -> Array a
 toArray list =
-    case list of
-        Nil ->
-            Array.empty
-
-        Cons first rest ->
-            Array.append (Array.push first Array.empty) (toArray <| rest ())
+    toList list |> Array.fromList
 
 
 {-| Convert an array to a lazy list.
@@ -444,7 +444,7 @@ dropWhile predicate list =
 
         Cons first rest ->
             if predicate first then
-                dropWhile predicate <| rest ()
+                dropWhile predicate (rest ())
 
             else
                 list
@@ -463,7 +463,7 @@ keepIf predicate list =
                 Cons first (\() -> keepIf predicate <| rest ())
 
             else
-                keepIf predicate <| rest ()
+                keepIf predicate (rest ())
 
 
 {-| Drop all elements in a list that satisfy the given predicate.
@@ -488,7 +488,7 @@ filterMap transform list =
                     Cons val (\() -> filterMap transform <| rest ())
 
                 Nothing ->
-                    filterMap transform <| rest ()
+                    filterMap transform (rest ())
 
 
 {-| Remove all duplicates from a list and return a list of distinct elements.
@@ -501,7 +501,7 @@ unique list =
 
         Cons first rest ->
             if member first <| rest () then
-                unique <| rest ()
+                unique (rest ())
 
             else
                 Cons first (\() -> unique <| rest ())
