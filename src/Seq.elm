@@ -317,13 +317,8 @@ intersperse a list =
                 Nil ->
                     cons first empty
 
-                Cons second rest2 ->
-                    case rest2 () of
-                        Nil ->
-                            cons first (cons a (cons second empty))
-
-                        _ ->
-                            cons first (cons a (cons second (cons a (intersperse a (rest2 ())))))
+                rest_ ->
+                    cons first <| Cons a (\_ -> intersperse a rest_)
 
 
 {-| Interleave the elements of a list in another list. The two lists get
