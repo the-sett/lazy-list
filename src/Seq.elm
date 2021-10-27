@@ -589,26 +589,31 @@ map3 f list1 list2 list3 =
 -}
 product2 : Seq a -> Seq b -> Seq ( a, b )
 product2 list1 list2 =
-    case list1 of
+    case seq1 of
         Nil ->
             Nil
 
         Cons first1 rest1 ->
-            case list2 of
+            case seq2 of
                 Nil ->
                     Nil
 
-                Cons _ _ ->
-                    append (map (Tuple.pair first1) list2) (product2 (rest1 ()) list2)
+                Cons first2 rest2 ->
+                    let
+                        _ =
+                            Debug.log "consing" ( first1, first2 )
+                    in
+                    Cons ( first1, first2 )
+                        (\() ->
+                            append
+                                (product2 (singleton first1) (rest2 ()))
+                                (product2 (rest1 ()) (rest2 ()))
+                        )
+
 
 
 {-| Create a lazy list containing all possible triples in the given lazy lists.
 -}
 product3 : Seq a -> Seq b -> Seq c -> Seq ( a, b, c )
 product3 list1 list2 list3 =
-    case list1 of
-        Nil ->
-            Nil
-
-        Cons first1 rest1 ->
-            append (map (\( b, c ) -> ( first1, b, c )) (product2 list2 list3)) (product3 (rest1 ()) list2 list3)
+    product2 list1 (product2 list2 list3) |> map (\( a, ( b, c ) ) -> ( a, b, c ))
