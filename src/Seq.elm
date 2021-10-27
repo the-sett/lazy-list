@@ -599,10 +599,6 @@ product2 list1 list2 =
                     Nil
 
                 Cons first2 rest2 ->
-                    let
-                        _ =
-                            Debug.log "consing" ( first1, first2 )
-                    in
                     Cons ( first1, first2 )
                         (\() ->
                             append
