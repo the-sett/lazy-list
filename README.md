@@ -7,5 +7,9 @@ but is a reasonable compromise without memoizing support from the runtime.
 
 ## Version 1.1.1
 
-Thanks to Aaron Dixon, many functions have been made tail recursive where they 
+Many functions have been made tail recursive where they 
 were not in the original 1.0.0 release.
+
+## Version 1.1.2
+
+`product2` and `product3` have been made tail recursive.
