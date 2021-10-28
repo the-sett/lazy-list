@@ -589,12 +589,12 @@ map3 f list1 list2 list3 =
 -}
 product2 : Seq a -> Seq b -> Seq ( a, b )
 product2 list1 list2 =
-    case seq1 of
+    case list1 of
         Nil ->
             Nil
 
         Cons first1 rest1 ->
-            case seq2 of
+            case list2 of
                 Nil ->
                     Nil
 
