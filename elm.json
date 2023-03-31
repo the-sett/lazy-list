@@ -3,7 +3,7 @@
     "name": "the-sett/lazy-list",
     "summary": "Lazy lists for Elm.",
     "license": "BSD-3-Clause",
-    "version": "1.1.2",
+    "version": "1.2.0",
     "exposed-modules": [
         "Seq"
     ],
