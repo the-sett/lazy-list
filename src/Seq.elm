@@ -153,7 +153,8 @@ headAndTail list =
 {-| Get the nth element of a list.
 -}
 nth : Int -> Seq a -> Maybe a
-nth = ((<<) head) << drop << (+) (-1)
+nth n list =
+    head <| drop (n-1) list
 
 
 {-| Test if a value is a member of a list.
