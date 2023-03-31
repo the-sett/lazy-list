@@ -1,7 +1,7 @@
 module Seq exposing
     ( Seq(..)
     , cons, empty, singleton
-    , isEmpty, head, tail, headAndTail, member, length
+    , isEmpty, head, tail, headAndTail, nth, member, length
     , toList, fromList, toArray, fromArray
     , map, zip, reduce, reductions, flatten, append, foldl, foldr
     , intersperse, interleave, reverse, cycle, iterate, repeat, take, takeWhile, drop, dropWhile
@@ -27,7 +27,7 @@ module Seq exposing
 
 # Query operations.
 
-@docs isEmpty, head, tail, headAndTail, member, length
+@docs isEmpty, head, tail, headAndTail, nth, member, length
 
 
 # Conversions.
@@ -148,6 +148,13 @@ headAndTail list =
 
         Cons first rest ->
             Just ( first, rest () )
+
+
+{-| Get the nth element of a list.
+-}
+nth : Int -> Seq a -> Maybe a
+nth n list =
+    head <| drop (n-1) list
 
 
 {-| Test if a value is a member of a list.
